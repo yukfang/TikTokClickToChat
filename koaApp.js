@@ -27,11 +27,11 @@ koaApp.use(async (ctx, next) => {
 
 router.get('/monitor/:num', (ctx, next) => {
     let num = ctx.params.num || 5; // Max 5 maybe
-    ctx.body = JSON.stringify(CALLBACK_BUFF.slice(0, num), null, 2)
+    ctx.body = JSON.stringify(CALLBACK_BUFF.reverse().slice(0, num), null, 2)
 })
 router.get('/monitor', (ctx, next) => {
     // let num = ctx.params.num || 5; // Max 5 maybe
-    ctx.body = JSON.stringify(CALLBACK_BUFF.slice(0, 5), null, 2)
+    ctx.body = JSON.stringify(CALLBACK_BUFF.reverse().slice(0, 5), null, 2)
 })
 router.all('/callback', (ctx, next) => {
     // Need to implementa Facebook callback challenge here:
@@ -43,10 +43,22 @@ router.all('/callback', (ctx, next) => {
         ts: new Date(Date.now()).toISOString(),
         query, headers, req_body
     }
+    CALLBACK_BUFF.push(resp_body)
 
-    CALLBACK_BUFF.push(resp_body);
 
-    ctx.body = JSON.stringify(resp_body, null, 2);
+
+    let mode = query["hub.mode"];
+    let token = query["hub.verify_token"];
+    let challenge = query["hub.challenge"];
+    if (mode && token) {
+        if (mode === "subscribe" && token != null) {
+            // Respond with the challenge token from the request
+            console.log("WEBHOOK_VERIFIED");
+            ctx.body = challenge
+        }
+    } else {
+        ctx.body = JSON.stringify(resp_body, null, 2);
+    }
 })
 
 koaApp.use(async (ctx, next) => {
