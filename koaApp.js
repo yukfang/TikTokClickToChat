@@ -65,7 +65,7 @@ router.all('/callback', (ctx, next) => {
     if (req_body) {
         if (req_body.entry[0]) {
           const changes = req_body.entry[0].changes;
-          console.log(changes);
+          // console.log(changes);
           const { value } = changes[0];
           if (value && value.messages && value.messages[0] ) {
               if (value.messages[0].button) {
@@ -77,10 +77,11 @@ router.all('/callback', (ctx, next) => {
                   eventDetail.eventType = 'AddToCart';
                   //Trigger Events API
                   sendEvents(eventDetail);
-                } else if (whatsAppMsg && whatsAppMsg === 'Not interested')
-                  eventDetail.eventType = 'Purchase';
-                  //Trigger Events API
-                  sendEvents(eventDetail);
+                } else if (whatsAppMsg && whatsAppMsg === 'Not interested') {
+                    eventDetail.eventType = 'Purchase';
+                    //Trigger Events API
+                    sendEvents(eventDetail);
+                }
               }
           }
         }

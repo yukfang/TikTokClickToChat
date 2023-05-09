@@ -2,6 +2,8 @@ module.exports = work;
 
 function work() {};
 
+const { sendEvents } = require('./ttEventsApi');
+
 const resp = {
         "object": "whatsapp_business_account",
         "entry": [
@@ -61,21 +63,20 @@ work.checkResp = () => {
               if (value.messages[0].button) {
                 const whatsAppMsg = value.messages[0].button.text;
                 console.log(whatsAppMsg);
-                /*
-                const 
-                const detail = {
-                    'event': 'ViewContent'
+                const eventDetail = {};
+                if (whatsAppMsg && whatsAppMsg === 'Know more') {
+                  eventDetail.eventType = 'AddToCart';
+                  console.log('***** Calling from work.checkResp ATC *******');
+                  sendEvents(eventDetail);
+                } else if (whatsAppMsg && whatsAppMsg === 'Not interested') {
+                  eventDetail.eventType = 'Purchase';
+                  console.log('***** Calling from work.checkResp PUR *******');
+                  sendEvents(eventDetail);
                 }
-                if (whatsAppMsg.) {
-    
-                }
-                sendEvents(ctx.body);
-                */
               }
           }
         }
 
     }
 }
-
 
