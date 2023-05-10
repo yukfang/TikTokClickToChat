@@ -1,13 +1,15 @@
 const axios = require("axios");
 const pixelCode = 'CGCJ2VRC77UA9DC1TNDG';
 const accessToken = 'b4601a65a77fe40191bf7ed27ec4647e3f84054f';
+const eventId = Math.floor(Math.random() * 1000000000000) + 1;
 
 const constructBody = (detail) => {
     return {
+            "test_event_code": 'TEST54665',
             "pixel_code": pixelCode,
             "event": detail.eventType,
-            "event_id": Math.floor(Math.random() * 1000000000000) + 1,
-            "timestamp": Date.now(),
+            "event_id": eventId.toString(),
+            "timestamp": new Date(),
             "context": {
             "ad": {
                 "callback": "123ATXSfe"
@@ -28,6 +30,7 @@ const constructBody = (detail) => {
                     "content_id": "5678AB",
                     "content_category": "Kids",
                     "content_name": "Product 1",
+                    "content_type": "product",
                     "quantity": 1,
                     "price": 29.99
                 },
@@ -35,6 +38,7 @@ const constructBody = (detail) => {
                     "content_id": "6521FJ",
                     "content_category": "Kids",
                     "content_name": "Product 2",
+                    "content_type": "product",
                     "quantity": 1,
                     "price": 49.99
                 }
@@ -56,12 +60,13 @@ const sendEvents = (detail) => {
             'Access-Token': accessToken,
             'Content-Type': 'application/json'
         },
-        body: constructBody(detail)
+        data: constructBody(detail)
     })
     .then ((response) => {
         console.log('Success');
         console.log('Response status ----->' + response.status);
-        console.log('Response data ----->' + response.status);
+        console.log('Response data ----->' + JSON.stringify(response.data));
+        console.log('Response request ----->' + JSON.stringify(response.request));
     })
     .catch((error) => {
         console.log('Failure');
