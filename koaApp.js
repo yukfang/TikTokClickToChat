@@ -62,7 +62,8 @@ router.all('/callback', (ctx, next) => {
     }
 
     //Invoke TikTok Events API
-    if (req_body) {
+    if (req_body && req_body.entry) {
+        // console.log(req_body.entry)
         if (req_body.entry[0]) {
           const changes = req_body.entry[0].changes;
           // console.log(changes);
