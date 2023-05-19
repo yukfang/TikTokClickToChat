@@ -6,6 +6,8 @@ const { sendEvents } = require('./ttEventsApi');
 const koaApp = new Koa();
 
 const CALLBACK_BUFF = []
+const PROMO_CODE = new Map();
+
 
 koaApp.use(koaBody());
 koaApp.use(router.routes());
@@ -25,6 +27,16 @@ koaApp.use(async (ctx, next) => {
     const ms = Date.now() - start;
     ctx.set('X-Response-Time', `${ms}ms`);
 });
+
+router.get('/ttclid/:num', (ctx, next) => {
+    ctx.body = fs.readFileSync('middle.html', {encoding:'utf8', flag:'r'});
+})
+
+router.get('/promo/:code', (ctx, next) => {
+    let code = ctx.params.code || 5; // Max 5 maybe
+
+    ctx.body = fs.readFileSync('middle.html', {encoding:'utf8', flag:'r'});
+})
 
 router.get('/monitor/:num', (ctx, next) => {
     let num = ctx.params.num || 5; // Max 5 maybe
@@ -89,9 +101,41 @@ router.all('/callback', (ctx, next) => {
     }
 })
 
+const ALPHA_B = ['A', 'B', 'C', 'D', 'E', 'F']
 koaApp.use(async (ctx, next) => {
     if (ctx.path === '/') {
-        ctx.body = fs.readFileSync('index.html', {encoding:'utf8', flag:'r'});
+        const ttclid = ctx.request.query['ttclid']
+        const promo = ctx.request.query['promo']
+
+        if(promo) {
+            ctx.body = fs.readFileSync('index.html', {encoding:'utf8', flag:'r'});
+        } else if(ttclid !== null) {
+            // Generate Promo Code
+            let promocode = '';
+            if(PROMO_CODE.has(ttclid)) {
+                promocode = PROMO_CODE.get(ttclid)
+            }  else {
+                const max = ALPHA_B.length - 1
+                for(let i = 0; i < 6; i++) {
+                    const index = Math.random() * max
+                    promocode += ALPHA_B.slice(index, index + 1)
+                }
+                PROMO_CODE.set(ttclid, promocode)
+            }
+
+            ctx.set('Promote-Code', promocode); // set to response header
+            ctx.cookies.set('Promote-Code', promocode, {httpOnly: false}); // set to cookie
+
+            ctx.status = 301;
+
+            ctx.redirect(`/?promo=${promocode}`);
+        } else {
+            ctx.body = fs.readFileSync('index.html', {encoding:'utf8', flag:'r'});
+        }
+    } else if (ctx.path === '/gp') {
+        ctx.body = fs.readFileSync('gp.html', {encoding:'utf8', flag:'r'});
+    } else if (ctx.path === '/middle') {
+        ctx.body = fs.readFileSync('middle.html', {encoding:'utf8', flag:'r'});
     }
     next();
 })
