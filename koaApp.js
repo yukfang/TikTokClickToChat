@@ -108,8 +108,11 @@ koaApp.use(async (ctx, next) => {
         const promo = ctx.request.query['promo']
 
         if(promo) {
+            console.log(`promo code not null`)
             ctx.body = fs.readFileSync('index.html', {encoding:'utf8', flag:'r'});
-        } else if(ttclid !== null) {
+        } else if(ttclid) {
+            console.log(`click id not null ${ttclid}`)
+
             // Generate Promo Code
             let promocode = '';
             if(PROMO_CODE.has(ttclid)) {
@@ -127,7 +130,7 @@ koaApp.use(async (ctx, next) => {
             ctx.cookies.set('Promote-Code', promocode, {httpOnly: false}); // set to cookie
 
             ctx.status = 301;
-
+            console.log(`redirct`)
             ctx.redirect(`/?promo=${promocode}`);
         } else {
             ctx.body = fs.readFileSync('index.html', {encoding:'utf8', flag:'r'});
